@@ -1,0 +1,36 @@
+<head>
+        <title>Mabinogi</title>
+        <meta charset="UTF-8">
+        <meta name="jet-fuel" content="cant-melt-steel-beams">
+        <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/angular_material/1.1.1/angular-material.min.css">
+        <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+	<link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+        <link href="//fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+
+<body ng-app="mainApp" style="margin:0">
+<script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-animate.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-aria.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-route.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular-messages.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/angular_material/1.1.1/angular-material.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/angular-material-icons/0.7.1/angular-material-icons.min.js"></script>
+<script src="{{ url_for('static', filename='main.js') }}"></script>
+<div layout="column" ng-controller="mainCtrl as ctrl">
+	<div class="header" ng-init="ctrl.getItems()">
+		<select ng-change="ctrl.getMonsters()" ng-model="ctrl.monster">
+			<option ng-repeat="option in ctrl.monsters" value="{a option[1] a}">{a option[2] a}</option>
+		</select>
+	</div>
+	<div class="body">
+		<div layout="column">
+			<h2>Item Drops</h2>
+			<div ng-if="!ctrl.items.length">No Items :(</div>		
+			<div ng-repeat="item in ctrl.items">
+				{a item[0] a}
+			</div>
+		</div>
+	</div>
+</body>
