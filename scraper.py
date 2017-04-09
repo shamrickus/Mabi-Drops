@@ -96,19 +96,19 @@ for affix in data["OptionSet"]["OptionSetList"]["OptionSet"]:
 			"name": affix["@Name"]
 		})
 
-db = MySQLdb.connect(host=config["host"], user=config["user"], password=config["password"], database=config["db"])
+db = MySQLdb.connect(host=config["host"], user=config["user"], password=config["password"], db=config["db"])
 
 cur = db.cursor()
 
-query = "INSERT INTO Affix(name, affix_id) VALUES(%s, %s)"
+query = "INSERT INTO affix(name, affix_id) VALUES(%s, %s)"
 for affix in affixs:
 	cur.execute(query, (affix["name"], affix["affix_id"]))
 
-query = "INSERT INTO Manual(name, manual_id) VALUES(%s, %s)"
+query = "INSERT INTO manual(name, manual_id) VALUES(%s, %s)"
 for manual in manuals:
 	cur.execute(query, (manual["name"], manual["manual_id"]))
 
-query = "INSERT INTO Item(item_id, name) VALUES(%s, %s)"
+query = "INSERT INTO item(item_id, name) VALUES(%s, %s)"
 for item in items:
 	cur.execute(query, (item["item_id"], item["name"]))
 
@@ -126,7 +126,7 @@ for drop in drop_table:
 	num = 3
 	drops = drop_table[drop]
 	tup = ( drops["monster_id"], drops["drop_tier"], drops["probability"] )
-	query = "INSERT INTO `Drop Table`(monster_id, drop_tier, probability, "
+	query = "INSERT INTO `drop_table`(monster_id, drop_tier, probability, "
 	#monster_id, drops_tier, probability, item_id, manual_id, prefix_id, suffix_id) \"
 	if "item_id" in drops:
 		query += "item_id"

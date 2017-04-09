@@ -1,20 +1,20 @@
 USE mabi;
 
-DROP Table IF EXISTS `Item`;
-CREATE TABLE `Item` (
+DROP Table IF EXISTS `item`;
+CREATE TABLE `item` (
 	`id` int not null auto_increment PRIMARY KEY ,
 	`item_id` varchar(255) NOT NULL,
 	`name` varchar(255) NOT NULL
 );
 
-DROP Table IF EXISTS `Affix`;
-CREATE TABLE `Affix` (
+DROP Table IF EXISTS `affix`;
+CREATE TABLE `affix` (
 	`id` int not null auto_increment PRIMARY KEY,
 	`affix_id` varchar(255) not null,
 	`name` VARCHAR(255) NOT NULL
 );
 
-DROP Table IF EXISTS `Manual`;
+DROP Table IF EXISTS `manual`;
 CREATE TABLE `Manual` (
 	`id` int not null auto_increment PRIMARY KEY,
 	`name` varchar(255) not null,
@@ -29,8 +29,8 @@ CREATE TABLE `monster` (
 	`name`varchar(255) not null
 );
 
-DROP Table IF EXISTS `Drop Table`;
-CREATE TABLE `Drop Table` (
+DROP Table IF EXISTS `drop_table`;
+CREATE TABLE `drop_table` (
 	`id` int not null auto_increment PRIMARY KEY,
 	`monster_id`varchar(255) not null,
 	`drop_tier`varchar(255) not null,

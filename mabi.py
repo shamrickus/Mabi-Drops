@@ -54,7 +54,7 @@ def getMonsters():
 def getItems(monsterId):
 	conn = None
 	conn = getDb()
-	query = "SELECT Item.name FROM `Drop Table` join Item on Item.item_id = `Drop Table`.item_id WHERE monster_id = %s and `Drop Table`.item_id is not null"
+	query = "SELECT item.name FROM drop_table join item on item.item_id = drop_table.item_id WHERE monster_id = %s and drop_table.item_id is not null"
 	return flask.jsonify(conn.select(query, [str(monsterId)]))
 
 #@app.teardown_context
