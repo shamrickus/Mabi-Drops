@@ -96,11 +96,11 @@ for affix in data["OptionSet"]["OptionSetList"]["OptionSet"]:
 			"name": affix["@Name"]
 		})
 
-db = MySQLdb.connect(host=config["host"], user=config["user"], password=config["password"], db=config["db"])
+db = MySQLdb.connect(host=config["host"], user=config["user"], passwd=config["password"], db=config["db"])
 
 cur = db.cursor()
 
-query = "INSERT INTO affix(name, affix_id) VALUES(%s, %s)"
+"""query = "INSERT INTO affix(name, affix_id) VALUES(%s, %s)"
 for affix in affixs:
 	cur.execute(query, (affix["name"], affix["affix_id"]))
 
@@ -120,7 +120,9 @@ query = "INSERT INTO monster_drop(monster_id, drop_one, drop_two, drop_three) VA
 
 for drop in monster_drops:
 	cur.execute(query, (drop["monster_id"], drop["drop_one"], drop["drop_two"], drop["drop_three"]))
+"""
 
+print drop_table
 
 for drop in drop_table:
 	num = 3
