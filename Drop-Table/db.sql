@@ -15,7 +15,7 @@ CREATE TABLE `affix` (
 );
 
 DROP Table IF EXISTS `manual`;
-CREATE TABLE `Manual` (
+CREATE TABLE `manual` (
 	`id` int not null auto_increment PRIMARY KEY,
 	`name` varchar(255) not null,
 	`manual_id` varchar(255) not null

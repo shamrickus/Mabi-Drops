@@ -1,10 +1,12 @@
 <head>
         <title>Mabinogi</title>
+        <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico')}}" type="image/x-icon">
+		<link rel="icon" href="{{ url_for('static', filename='favicon.ico')}}" type="image/x-icon">
         <meta charset="UTF-8">
         <meta name="jet-fuel" content="cant-melt-steel-beams">
         <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/angular_material/1.1.1/angular-material.min.css">
         <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
-	<link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+		<link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
         <link href="//fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 
@@ -19,18 +21,27 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/angular-material-icons/0.7.1/angular-material-icons.min.js"></script>
 <script src="{{ url_for('static', filename='main.js') }}"></script>
 <div layout="column" ng-controller="mainCtrl as ctrl">
-	<div class="header" ng-init="ctrl.getItems()">
-		<select ng-change="ctrl.getMonsters()" ng-model="ctrl.monster">
-			<option ng-repeat="option in ctrl.monsters" value="{a option[1] a}">{a option[2] a}</option>
-		</select>
-	</div>
-	<div class="body">
+	<md-card ng-init="ctrl.getMonsters()" class="md-padding">
+		<h1 class="md-title">Pick a monster below</h1>
+		<div layout="row">
+			<md-input-container>
+				<label>Monster</label>
+				<md-select ng-if="ctrl.monsters" ng-model="ctrl.monsterIndex" ng-change="ctrl.getItems();ctrl.getManuals()">
+					<!-- <md-select-header>
+						<input ng-model="ctrl.monsterText" type="search" placeholder="Search for a monster...">
+					</md-select-header> -->
+					<md-optgroup label="Monster">
+						<md-option ng-value="$index" ng-repeat="monster in ctrl.monsters" ng-bind="monster.desc"></md-option>
+					</md-optgroup>
+			</md-input-container>
+		</div>
+		<md-divider></md-divider>
 		<div layout="column">
-			<h2>Item Drops</h2>
-			<div ng-if="!ctrl.items.length">No Items :(</div>		
-			<div ng-repeat="item in ctrl.items">
-				{a item[0] a}
+			<h2 class="md-title">Drops</h2>
+			<div ng-repeat="column in ctrl.columns">
+				<h3>{a column.header a}{a ctrl.getDropChance(column) a}</h3>
+				<span ng-repeat="item in ctrl.monsters[ctrl.monsterIndex][column.tierKey]">{a item.name a}: {a ctrl.dropChance(column, item.probability) a}%<br /></span>
+				<span ng-if="ctrl.monsterIndex == null || !ctrl.monsters[ctrl.monsterIndex][column.tierKey].length">No drops in this tier</span>
 			</div>
 		</div>
-	</div>
 </body>

@@ -1,5 +1,6 @@
 import json, xmltodict, MySQLdb
-from config import *
+from config import config
+from db import reset
 
 items = []
 monsters = []
@@ -8,39 +9,51 @@ drop_table = dict()
 affixs = []
 manuals = []
 
+reset(config)
+
+#drop_table -> monster -> tier -> item -> { prob, prefix, suffix, type }
 def populate(pTable):
 	for dType in ["Drop1", "Drop2", "Drop3"]:
+		if  len(pTable[dType]) < 1:
+			continue
+
+		if pTable["TypeID"] not in drop_table:
+			drop_table[pTable["TypeID"]] = dict()
+		if int(dType[-1:]) not in drop_table[pTable["TypeID"]]:
+			drop_table[pTable["TypeID"]][int(dType[-1:])] = dict()
+
 		drops = pTable[dType].replace("(", "").replace(")", "").split(';')
 		for drop in drops:
 			itemAttrs = drop.split(" ")
-
-			iId = ""
+			iId = None
 			for attr in itemAttrs:
 				fullAttr = attr.split(":")
 
-				if fullAttr[0] == "id":
+				if fullAttr[0] in ["id", "manual"]:
 					iId = fullAttr[1]
 
-					drop_table[iId] = dict()
-					drop_table[iId]["monster_id"] = (pTable["TypeID"])
-					drop_table[iId]["item_id"] = (iId)
-					drop_table[iId]["probability"] = repr( (int(drop_table[iId]["probability"]) + 1) if "probability" in drop_table[iId] else 1)
-					drop_table[iId]["drop_tier"] = repr(1)
+					if iId in drop_table[pTable["TypeID"]][int(dType[-1:])]:
+						prob = int( drop_table[pTable["TypeID"]][int(dType[-1:])][iId]["prob"]) + 1
+					else:
+						prob = 1
+						drop_table[pTable["TypeID"]][int(dType[-1:])][iId] = dict()
 
-				elif fullAttr[0] == "manual":
-					iId = fullAttr[1]
+					if fullAttr[0] == "id":
+						iType = "item_id"
+					else:
+						iType = "manual_id"
 
-					drop_table[iId] = dict()
-					drop_table[iId]["monster_id"] = (pTable["TypeID"])
-					drop_table[iId]["manual_id"] = (fullAttr[1])
-					drop_table[iId]["probability"] = repr( (int(drop_table[iId]["probability"]) + 1) if "probability" in drop_table[iId] else 1)
-					drop_table[iId]["drop_tier"] = repr(1)
+					drop_table[pTable["TypeID"]][int(dType[-1:])][iId] = {
+						'type': iType,
+						'prob': prob
+					}
 
 				elif fullAttr[0] == "suffix":
-					drop_table[iId]["suffix_id"] = (fullAttr[1])
+					drop_table[pTable["TypeID"]][int(dType[-1:])][iId]["suffix_id"] = fullAttr[1]
 
 				elif fullAttr[0] == "prefix":
-					drop_table[iId]["prefix_id"] = (fullAttr[1])
+					drop_table[pTable["TypeID"]][int(dType[-1:])][iId]["prefix_id"] = fullAttr[1]
+
 with open('Drop-Table/itemdroptype.json') as file:
 	data = json.load(file)
 
@@ -58,9 +71,9 @@ for key, value in data.items():
 	monster_drops.append(
 		{
 			'monster_id':	value["TypeID"],
-			'drop_one':		value["Drop1Rate"],
-			'drop_two':		value["Drop2Rate"],
-			'drop_three':	value["Drop3Rate"]
+			'drop_one':		value["Drop1Rate"] if "Drop1Rate" in value else 0,
+			'drop_two':		value["Drop2Rate"] if "Drop2Rate" in value else 0,
+			'drop_three':	value["Drop3Rate"] if "Drop3Rate" in value else 0
 		}
 	)
 
@@ -73,7 +86,7 @@ with open('Drop-Table/itemdb.xml') as file:
 for item in data["Items"]["Mabi_Item"]:
 	items.append({
 		"item_id": (item["@ID"]),
-		"name": repr(item["@Text_Name0"]) if "@Text_Name0" in item else ""
+		"name": repr(item["@Text_Name0"]) if "@Text_Name0" in item else "Unknown Name: " + str(item["@ID"])
 	})
 
 with open('Drop-Table/manualform.xml') as file:
@@ -100,7 +113,7 @@ db = MySQLdb.connect(host=config["host"], user=config["user"], passwd=config["pa
 
 cur = db.cursor()
 
-"""query = "INSERT INTO affix(name, affix_id) VALUES(%s, %s)"
+query = "INSERT INTO affix(name, affix_id) VALUES(%s, %s)"
 for affix in affixs:
 	cur.execute(query, (affix["name"], affix["affix_id"]))
 
@@ -120,36 +133,38 @@ query = "INSERT INTO monster_drop(monster_id, drop_one, drop_two, drop_three) VA
 
 for drop in monster_drops:
 	cur.execute(query, (drop["monster_id"], drop["drop_one"], drop["drop_two"], drop["drop_three"]))
-"""
 
-print drop_table
 
-for drop in drop_table:
-	num = 3
-	drops = drop_table[drop]
-	tup = ( drops["monster_id"], drops["drop_tier"], drops["probability"] )
-	query = "INSERT INTO `drop_table`(monster_id, drop_tier, probability, "
-	#monster_id, drops_tier, probability, item_id, manual_id, prefix_id, suffix_id) \"
-	if "item_id" in drops:
-		query += "item_id"
-		tup = tup + (drops["item_id"],)
-	if "manual_id" in drops:
-		query += "manual_id"
-		tup = tup + (drops["manual_id"],)
-	if "prefix_id" in drops:
-		query += ", prefix_id"
-		tup = tup + (drops["prefix_id"],)
-		num += 1
-	if "suffix_id" in drops:
-		query += ", suffix_id"
-		tup = tup + (drops["suffix_id"],)
-		num += 1
-	query += ") VALUES(%s"
-	for i in range(num):
-		query += ", %s"
-	query += ")"
+#drop_table -> monster -> tier -> item -> { prob, prefix, suffix, type }
+entries = 0
+for monster in drop_table:
+	for drop in drop_table[monster]:
+		for iId in drop_table[monster][drop]:
+			num = 3
+			query = "INSERT INTO `drop_table`(monster_id, drop_tier, probability, "
 
-	cur.execute(query, tup)
+			value = drop_table[monster][drop][iId]
+
+			if value["type"] not in query:
+				query += value["type"]
+
+			tup = ( monster, drop, value["prob"], int(iId) )
+
+			for modify in ["suffix_id", "prefix_id"]:
+				if modify in value:
+					tup = tup + (value[modify],)
+					if modify not in query:
+						num += 1
+						query += ", " + modify
+
+			query += ") VALUES(%s"
+			for i in range(num):
+				query += ", %s"
+			query += ")"
+			cur.execute(query, tup)
+			entries+= 1
+
+print "Inserted " + str(entries)
 
 db.commit()
 db.close()
